@@ -18,11 +18,19 @@ export const GlobalProvider = ({ children }) => {
         setExpenses([]);
         setBudgets([]);
     };
-
     const signUp = async (name, email) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${BASE_URL}signup`, { name, email });
+            const sanitizedName = sanitizeInput(name);
+            const sanitizedEmail = sanitizeInput(email);
+    
+            // Use sanitized values directly in the request
+            const response = await axios.post(`${BASE_URL}signup`, { 
+                name: sanitizedName, 
+                email: sanitizedEmail 
+            });
+    
+            // Now use the response object to extract data
             setUser(response.data.user);
             const userId = response.data.user._id;
             getIncomes(userId);
@@ -39,7 +47,6 @@ export const GlobalProvider = ({ children }) => {
         try {
             const response = await axios.post(`${BASE_URL}signin`, { email });
             setUser(response.data.user);
-            // Load user-specific data
             getIncomes(response.data.user._id);
             getExpenses(response.data.user._id);
             setLoading(false);
@@ -149,6 +156,12 @@ const addExpense = async (expense) => {
         const history = [...incomes, ...expenses];
         history.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         return history.slice(0, 3);
+    };
+    const sanitizeInput = (input) => {
+        if (typeof input === "string") {
+            return input.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        return input;
     };
 
     return (

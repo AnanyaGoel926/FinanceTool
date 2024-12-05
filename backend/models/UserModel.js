@@ -12,7 +12,12 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true
+    },
+    isLoggedIn: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
+UserSchema.index({ name: 1 });
 
 module.exports = mongoose.model('User', UserSchema);
